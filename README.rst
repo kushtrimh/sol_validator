@@ -26,7 +26,8 @@ Quick start
         ...
     
 
-3. Include sol_validator Javascript and CSS files in your HTML file::
+3. Include sol_validator Javascript and CSS files in your HTML file.
+   You need JQuery in order for sol_validator to work::
     
     <link href="{% static 'sol_validator/solcss.css' %}></script>
     ...
