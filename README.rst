@@ -18,6 +18,7 @@ Quick start
     ]
 
 2. Create a form that inherits from SolForm.
+    
     from sol_validator.forms import SolForm
     ...
     ...
@@ -26,12 +27,14 @@ Quick start
     
 
 3. Include sol_validator Javascript and CSS files in your HTML file.
+    
     <link href="{% static 'sol_validator/solcss.css' %}></script>
     ...
     ...
     <script src="{% static 'sol_validator/soljs.js' %}"></script>
 
 4. Add 'sol-validator' attribute to your form.
+   
     <form action="" method="POST" sol-validator="error">
     ...
 
