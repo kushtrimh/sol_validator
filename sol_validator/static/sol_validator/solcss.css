@@ -1,0 +1,16 @@
+.solerror {
+	outline: 1px solid rgb(179, 27, 27);
+	box-shadow: 0px 0px 4px 1px #c53535;
+	background-color: rgba(227, 113, 113, 0.78);
+}
+#sol-error-displayer {
+	list-style: none;
+	background-color: rgba(227, 113, 113, 0.78);
+	color: rgb(255, 255, 255);
+	border: 1px solid rgb(179, 27, 27);
+}
+.sol-symbol {
+	color: rgb(179, 27, 27);
+	font-size: 1.5em;
+	margin: 5px;
+}
