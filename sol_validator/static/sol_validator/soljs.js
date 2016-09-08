@@ -1,10 +1,11 @@
 var solVersion;
 var solErrorClass;
 var solSuccessClass;
-var solTooltipClass;
+var solSymbolClass;
 var solRequest;
 var currentForm;
 var errorListId;
+var solSymbol;
 
 var errorListElement = document.getElementById(errorListId);
 
@@ -62,7 +63,8 @@ function solFormBuilder(evt){
 	solErrorClass = $(this).attr("sol-error");
 	solSuccessClass = $(this).attr("sol-success");
 	errorListId = $(this).attr("sol-errorlist");
-	solTooltipClass = $(this).attr("sol-tooltip");
+	solSymbolClass = $(this).attr("sol-symbolclass");
+	solSymbol = $(this).attr("sol-symbol")
 
 	// Set default CSS classess if none given
 	if (!solErrorClass) {
@@ -77,8 +79,12 @@ function solFormBuilder(evt){
 		errorListId = "sol-error-displayer";
 	}
 
-	if (!solTooltipClass) {
-		solTooltipClass = "sol-symbol";
+	if (!solSymbolClass) {
+		solSymbolClass = "sol-tooltip-symbol";
+	}
+
+	if (!solSymbol) {
+		solSymbol = "&otimes;";
 	}
 
 	// Check if the form validation should be done
@@ -403,12 +409,12 @@ function errorDisplayer(messageObject) {
 
 function tooltipDisplayer(messageObject) {
 	var elem = messageObject.element;
-	// var tooltip = "<span class='"+solTooltipClass+"' title='"
+	// var tooltip = "<span class='"+solSymbolClass+"' title='"
 	// 			  +messageObject.message+"'>&otimes;</span>";
 	var tooltip = document.createElement("span");
-	tooltip.className = solTooltipClass;
+	tooltip.className = solSymbolClass;
 	tooltip.setAttribute("title", messageObject.message);
-	tooltip.innerHTML = "&otimes;";
+	tooltip.innerHTML = solSymbol;
 
 	$(elem).after(tooltip);
 	tooltipElements.push(tooltip);
@@ -580,38 +586,3 @@ function strftimePattern(ch) {
 
 	return pattern;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
