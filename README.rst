@@ -85,10 +85,10 @@ To set a CSS class for input fields with errors use::
     
    <form ... sol-error="youCSSClassName" ...>
   
-To set a CSS class for unordered list which holds the errors
+To set a CSS id for the unordered list which holds the errors
 (only for 'error' type)::
     
-   <form ... sol-errorlist="youCSSClassName" ...>
+   <form ... sol-errorlist="youCSSIDName" ...>
    
 To set the HTML for the symbol that will be displayed when input field
 is invalid (only for 'tooltip' type)::
