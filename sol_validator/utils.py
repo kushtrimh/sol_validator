@@ -17,6 +17,7 @@ class SolAjax(object):
 		Builds the form data needed for validation
 		using the data sent by the AJAX request.
 		"""
+
 		form_data = json.loads(request_data['form_data'])
 
 		form_dict = {}

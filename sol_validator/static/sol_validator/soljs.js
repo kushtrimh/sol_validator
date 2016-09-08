@@ -162,12 +162,12 @@ function solValidator() {
 					message = elemName + " is required";
 					elemSuccess = false;
 				}
-			} else if (attrName == "sol-maxlength") {
+			} else if (attrName == "sol-max_length") {
 				if (formElem.value.length > attrValue) {
 					message = elemName + " maximum length: " + attrValue;
 					elemSuccess = false;
 				}
-			} else if (attrName == "sol-minlength"){
+			} else if (attrName == "sol-min_length"){
 				if (formElem.value.length < attrValue) {
 					message = elemName + " minimum length: " + attrValue;
 					elemSuccess = false;
@@ -183,9 +183,26 @@ function solValidator() {
 					elemSuccess = false;
 				}
 			} else if (attrName == "sol-input_formats") {
-				var dt = new Date(formElem.value);
-				if (dt == "Invalid Date") {
+			 	var dateFormats = getInputFormats(attrValue);
+			 	var validFormats = [];
+			 	// Check each format if valid
+			 	for (var it = 0; it < dateFormats.length; it++) {
+			 		validFormats.push(strftimeChecker(dateFormats[it], formElem.value));
+			 	}
+			 	// Check if any of the formats is valid
+			 	// and if none is valid, display errors.
+				if (!validFormats.includes(true)) {
 					message = elemName + " invalid format: " + formElem.value;
+					elemSuccess = false;
+				}
+			} else if (attrName == "sol-max_value") {
+				if (parseInt(formElem.value, 10) > parseInt(attrValue, 10)) {
+					message = elemName + " maximum value allowed: " + attrValue;
+					elemSuccess = false;
+				}
+			} else if (attrName == "sol-min_value") {
+				if (parseInt(formElem.value, 10) < parseInt(attrValue, 10)) {
+					message = elemName + " minimum value allowed: " + attrValue;
 					elemSuccess = false;
 				}
 			} else {
@@ -305,6 +322,14 @@ function displaySolRequestErrors(data) {
 	}
 }
 /*
+ Returns an array of input formats	
+*/
+function getInputFormats(formats) {
+	var formatsArray = formats.split("~");
+	return formatsArray;
+}
+
+/*
  Removes all the tooltips that were created
  on the last submit.
 */
@@ -341,15 +366,19 @@ function clearPlaceholders() {
  and returns the value.
 */
 function countDecimals(number) {
-	numSplited = number.split(".");
-	return numSplited[1].length;
+	var numSplited = number.split(".");
+	try {
+		return numSplited[1].length;
+	} catch (e) {
+		return 0;
+	}
 }
 
 /*
-	Displayer Functions
+ Displayer Functions
 
-	Used in the 'displayErrors' function. Displayer functions
-	help to display the error for the given solVersion.
+ Used in the 'displayErrors' function. Displayer functions
+ help to display the error for the given solVersion.
 */
 
 function palceholderDisplayer(messageObject){
@@ -384,3 +413,205 @@ function tooltipDisplayer(messageObject) {
 	$(elem).after(tooltip);
 	tooltipElements.push(tooltip);
 }
+
+/* 
+ Time format checker
+
+ Checks whenever a date format is valid
+ or not comparing it with the formats
+ given in the sol-input_formats attribute.
+
+ dFormat -- valid input format
+ dValue -- date value from the date field
+*/
+function strftimeChecker(dFormat, dValue) {
+	var chIndex = 0;
+	var dFormatArray = [];
+
+	// Go through each character and
+	// put them on an array
+	while (chIndex < dFormat.length) {
+		if (dFormat[chIndex] == '%') {
+			dFormatArray.push(dFormat[chIndex] + dFormat[chIndex+1]);
+			chIndex += 2;
+		} else {
+			dFormatArray.push(dFormat[chIndex]);
+			chIndex++;
+		}
+	}
+
+	// Create the data format regex pattern
+	var patt = "";
+	var formatReg = "";
+
+	for (var i = 0; i < dFormatArray.length; i++) {
+		var ch = dFormatArray[i];
+		// Check if its a strftime character
+		if (ch.startsWith("%")) {
+			// Find which character it is, and add
+			// the returned pattern to the formatReg
+			patt = strftimePattern(ch);
+			formatReg += patt;
+		} else {
+			// Add t regex since it's not
+			// a strftime character
+			formatReg += ch;
+		}
+	}
+
+	// Check if value matches regex pattern
+	var regObj = new RegExp(formatReg);
+	return regObj.test(dValue);
+}
+
+/*
+ Returns a regex pattern for the
+ given strftime character.
+*/
+function strftimePattern(ch) {
+	var pattern = '';
+
+	switch (ch) {
+		// Weekday as locale’s abbreviated name.
+		case "%a":
+			pattern = "(Mon|Tue|Wed|Thu|Fri|Sat|Sun)";
+			break;
+		// Weekday as locale’s full name.
+		case "%A":
+			pattern = "(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)";
+			break;
+		// Weekday as a decimal number, where 0 is Sunday and 6 is Saturday.
+		case "%w":
+			pattern = "[0-6]";
+			break;
+		// Day of the month as a zero-padded decimal number.
+		case "%d":
+			pattern = "([1-9]|2\\d|3[0-1])";
+			break;
+		// Month as locale’s abbreviated name.
+		case "%b":
+			pattern = "(Jan|Feb|Mar|Apr|May|June|July|Aug|Sept|Oct|Nov|Dec)";
+			break;
+		// Month as locale’s full name.
+		case "%B":
+			pattern = "(January|February|March|April|May|June|July|"
+					  "August|September|October|November|December)";
+			break;
+		// Month as a zero-padded decimal number.
+		case "%m":
+			pattern = "(0[1-9]|1[0-2])";
+			break;
+		// Year without century as a zero-padded decimal number.
+		case "%y":
+			pattern = "(0?[1-9]|[1-9][0-9])";
+			break;
+		// Year with century as a decimal number.
+		case "%Y":
+			pattern = "[0-9]{4}";
+			break;
+		// Hour (24-hour clock) as a zero-padded decimal number.
+		case "%H":
+			pattern = "(0[1-9]|1\\d|2[0-3])";
+			break;
+		// Hour (12-hour clock) as a zero-padded decimal number.
+		case "%I":
+			pattern = "(0[1-9]|1[0-2])";
+			break;
+		// Locale’s equivalent of either AM or PM.
+		case "%p":
+			pattern = "(AM|PM|am|pm)";
+			break;
+		// Minute as a zero-padded decimal number.
+		// Second as a zero-padded decimal number.
+		case "%M":
+		case "%S":
+			pattern = "(0[0-9]|[1-5][0-9])";
+			break;
+		// Microsecond as a decimal number, zero-padded on the left.
+		case "%f":
+			pattern = "[0-9]{6}";
+			break;
+		// UTC offset in the form +HHMM or -HHMM (empty string if the the object is naive).
+		case "%z":
+			pattern = "([+|-][0-9]{4})?";
+			break;
+		// Time zone name (empty string if the object is naive).
+		case "%Z":
+			pattern = "(UTC|EST|CST)?";
+			break;
+		// Day of the year as a zero-padded decimal number.
+		case "%j":
+			pattern = "(00[1-9]|0\\d\\d|[1-3][1-6][1-6])";
+			break;
+		// 1) Week number of the year (Sunday as the first day of the week) as 
+		// a zero padded decimal number. All days in a new year preceding 
+		// the first Sunday are considered to be in week 0.
+		// 
+		// 2) Week number of the year (Monday as the first day of the week) as 
+		// a decimal number. All days in a new year preceding the first Monday 
+		// are considered to be in week 0.
+		case "%U":
+		case "%W":
+			pattern = "(0[1-9]|[1-5][0-3])";
+			break;
+		// Locale’s appropriate date and time representation.
+		case "%c":
+			pattern = "(Mon|Tue|Wed|Thu|Fri|Sat|Sun) "
+					  "(Jan|Feb|Mar|Apr|May|June|July|Aug|Sept|Oct|Nov|Dec) "
+					  "([1-9]|2\\d|3[0-1]) ((0\\d|1\\d|2[0-3]):(0\\d|[1-5]\\d):(0\\d|[1-5]\\d)) "
+					  "[0-9]{4}";
+			break;
+		// Locale’s appropriate date representation.
+		case "%x":
+			pattern = "(0[1-9]|1[0-2])/([1-9]|2\\d|3[0-1])/[0-9]{4}";
+			break;
+		// Locale’s appropriate time representation.
+		case "%X":
+			pattern = "((0\\d|1\\d|2[0-3]):(0\\d|[1-5]\\d):(0\\d|[1-5]\\d))";
+			break;
+		// A literal '%' character.
+		case "%%":
+			pattern = "%";
+			break;
+		default:
+			pattern = "";
+			break;
+	}
+
+	return pattern;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

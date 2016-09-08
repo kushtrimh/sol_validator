@@ -14,7 +14,12 @@ class SolForm(Form):
 	additional_attrs = [
 		"input_formats",
 		"decimal_places",
-		"max_digits"
+		"max_digits",
+		"max_length",
+		"min_length",
+		"required",
+		"max_value",
+		"min_value",
 		]
 
 	def __init__(self, *args, **kwargs):
@@ -28,42 +33,47 @@ class SolForm(Form):
 		for name, field in self.fields.items():
 			# Add sol HTML attributes and change widget
 			self.widget_attrs = field.widget.attrs
-			for key, value in self.widget_attrs.items():
-				self.widget_attrs['sol-{}'.format(key)] = value
-
-			if field.required:
-				self.widget_attrs['sol-required'] = True
-
-			# Set additional attributes
+	
+			# Set attributes
 			for attr in self.additional_attrs:
-				self.set_additional_attr(field, attr)
+				attr_val = getattr(field, attr, None)
+				if attr_val is not None:
+					if attr == 'input_formats':
+						attr_val = "~".join(attr_val)
+					self.widget_attrs["sol-{}".format(attr)] = attr_val
 
 			# Reinitialize the widget now with new attrs
 			field.widget = field.widget.__class__(self.widget_attrs)
 
 		print(self.media)
 
-	def set_additional_attr(self, field, attr):
-		"""
-		Check if field has additional attr, if it does
-		make that a sol-* attribute and put it
-		to widget attrs.
-
-		field -- field which is being checked
-		attr -- the attribute name
-		"""
-		attr_val = getattr(field, attr, None)
-		if attr_val is not None:
-			if attr == 'input_formats':
-				attr_val = "~".join(attr_val)
-			self.widget_attrs["sol-{}".format(attr)] = attr_val
-
 # Forms to test
-# class MyForm(SolForm):
-# 	username = forms.CharField(max_length=50, required=True, min_length=2)
-# 	password = forms.CharField(max_length=50, required=True, min_length=3)
+class MyForm(SolForm):
+	username = forms.CharField(max_length=50, required=True, min_length=2)
+	password = forms.CharField(max_length=50, required=True, min_length=3)
 
-# class ThisForm(SolForm):
-# 	num = forms.DecimalField(required=True, max_digits=6, decimal_places=2)
-# 	date = forms.DateTimeField(required=True, input_formats=['%Y-%m-%d %H:%M:%S'])
-# 	age = forms.IntegerField(required=True)
+class ThisForm(SolForm):
+	num = forms.DecimalField(required=True, max_digits=6, decimal_places=2, max_value=300, min_value=50)
+	date = forms.DateTimeField(required=True, input_formats=['%Y-%m-%d %H:%M:%S'])
+	age = forms.IntegerField(required=True)
+
+
+### for key, value in self.widget_attrs.items():
+### 	self.widget_attrs['sol-{}'.format(key)] = value
+
+### if field.required:
+### self.widget_attrs['sol-required'] = True
+# def set_additional_attr(self, field, attr):
+# 	"""
+# 	Check if field has additional attr, if it does
+# 	make that a sol-* attribute and put it
+# 	to widget attrs.
+
+# 	field -- field which is being checked
+# 	attr -- the attribute name
+# 	"""
+# 	attr_val = getattr(field, attr, None)
+# 	if attr_val is not None:
+# 		if attr == 'input_formats':
+# 			attr_val = "~".join(attr_val)
+# 		self.widget_attrs["sol-{}".format(attr)] = attr_val
